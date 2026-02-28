@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>恋爱脑等级 & 戒断指南测评</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .disclaimer-top {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .question {
+            margin-bottom: 30px;
+        }
+
+        .question h3 {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .option {
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .option:hover {
+            background: #e0e0e0;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-container {
+            text-align: center;
+        }
+
+        .result-container h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .result {
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .radar-container {
+            margin: 40px auto;
+            max-width: 600px;
+            height: 500px;
+        }
+
+        .level-description {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .level-description h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .level-description p {
+            color: #666;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .disclaimer-bottom {
+            margin-top: 40px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>恋爱脑等级 & 戒断指南测评</h1>
+        <div class="disclaimer-top">
+            ⚠️ 本测试为趣味娱乐内容，非专业心理诊疗 / 心理咨询建议。
+        </div>
+        <div id="quiz-container">
+            <!-- 问题将动态生成 -->
+        </div>
+        <button class="btn" id="submit-btn">提交答案</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 问题库（40道题，5个维度，每个维度8道）
+        const questions = [
+            // 情感依赖度维度（8道）
+            {
+                question: "当对方没有及时回复你的消息时，你会：",
+                options: [
+                    "完全不在意，继续做自己的事情",
+                    "有点担心，但不会多想",
+                    "开始胡思乱想，担心对方是不是不爱自己了",
+                    "非常焦虑，不断给对方发消息",
+                    "崩溃大哭，觉得对方不在乎自己"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "情感依赖度"
+            },
+            {
+                question: "你会因为对方的一句话而情绪波动很大吗？",
+                options: [
+                    "完全不会，我能很好地控制自己的情绪",
+                    "偶尔会，但很快就能调整过来",
+                    "经常会，对方的一句话能影响我一整天的心情",
+                    "总是会，对方的一句话能让我开心或难过很久",
+                    "会因为对方的一句话而崩溃"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "情感依赖度"
+            },
+            {
+                question: "你会经常主动联系对方吗？",
+                options: [
+                    "完全不会，我有自己的事情要做",
+                    "偶尔会，当我有重要的事情要分享时",
+                    "会，每天会联系几次",
+                    "非常会，几乎每小时都要联系",
+                    "我已经无法控制自己，不停地给对方发消息"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "情感依赖度"
+            },
+            {
+                question: "当对方和异性接触时，你会：",
+                options: [
+                    "完全不在意，相信对方的忠诚",
+                    "有点介意，但不会表现出来",
+                    "会感到不舒服，开始胡思乱想",
+                    "非常生气，要求对方和异性保持距离",
+                    "崩溃大哭，觉得对方不爱自己了"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "情感依赖度"
+            },
+            {
+                question: "你会因为对方的喜好而改变自己的兴趣爱好吗？",
+                options: [
+                    "完全不会，我会坚持自己的兴趣爱好",
+                    "偶尔会，当对方的兴趣爱好很有趣时",
+                    "会，我会尝试喜欢对方的兴趣爱好",
+                    "非常会，我已经放弃了自己的兴趣爱好，只喜欢对方的",
+                    "我已经没有自己的兴趣爱好了，完全按照对方的喜好来生活"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "情感依赖度"
+            },
+            {
+                question: "你会经常和对方分享自己的生活细节吗？",
+                options: [
+                    "完全不会，我觉得没有必要",
+                    "偶尔会，当有重要的事情时",
+                    "会，每天会分享一些生活细节",
+                    "非常会，几乎每一件小事都会分享",
+                    "我已经无法控制自己，不停地和对方分享生活细节"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "情感依赖度"
+            },
+            {
+                question: "当对方不开心时，你会：",
+                options: [
+                    "完全不在意，相信对方能自己调整情绪",
+                    "有点担心，但不会太在意",
+                    "会感到不舒服，想办法让对方开心",
+                    "非常焦虑，想尽一切办法让对方开心",
+                    "崩溃大哭，觉得自己没有用"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "情感依赖度"
+            },
+            {
+                question: "你会因为对方的存在而忽略自己的朋友和家人吗？",
+                options: [
+                    "完全不会，我会平衡好恋爱和亲情友情的关系",
+                    "偶尔会，当对方需要我的时候",
+                    "会，我会花更多的时间陪伴对方",
+                    "非常会，我已经很少和朋友家人联系了",
+                    "我已经没有朋友和家人了，只和对方在一起"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "情感依赖度"
+            },
+            // 自我优先级让渡维度（8道）
+            {
+                question: "你会因为对方的需求而放弃自己的计划吗？",
+                options: [
+                    "完全不会，我会坚持自己的计划",
+                    "偶尔会，为了帮助对方",
+                    "会，我愿意为了对方放弃自己的计划",
+                    "非常会，我会优先考虑对方的需求",
+                    "我已经没有自己的计划了，完全按照对方的需求来生活"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "自我优先级让渡"
+            },
+            {
+                question: "你会为了对方而改变自己的职业规划吗？",
+                options: [
+                    "完全不会，我会坚持自己的职业规划",
+                    "偶尔会，当对方的建议很有道理时",
+                    "会，我会考虑对方的意见",
+                    "非常会，我已经按照对方的建议改变了职业规划",
+                    "我已经没有自己的职业规划了，完全按照对方的要求来生活"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "自我优先级让渡"
+            },
+            {
+                question: "你会为了对方而委屈自己吗？",
+                options: [
+                    "完全不会，我会坚持自己的原则",
+                    "偶尔会，当事情不重要时",
+                    "会，我愿意为了对方委屈自己",
+                    "非常会，我已经习惯了委屈自己",
+                    "我已经没有自己的原则了，完全按照对方的要求来生活"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "自我优先级让渡"
+            },
+            {
+                question: "你会因为对方的要求而放弃自己的兴趣爱好吗？",
+                options: [
+                    "完全不会，我会坚持自己的兴趣爱好",
+                    "偶尔会，当对方的要求很合理时",
+                    "会，我愿意为了对方放弃自己的兴趣爱好",
+                    "非常会，我已经放弃了自己的兴趣爱好",
+                    "我已经没有自己的兴趣爱好了，只喜欢对方的"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "自我优先级让渡"
+            },
+            {
+                question: "你会为了对方而改变自己的性格吗？",
+                options: [
+                    "完全不会，我会坚持自己的性格",
+                    "偶尔会，当对方的建议很有道理时",
+                    "会，我会尝试改变自己的性格",
+                    "非常会，我已经按照对方的要求改变了自己的性格",
+                    "我已经没有自己的性格了，完全按照对方的要求来生活"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "自我优先级让渡"
+            },
+            {
+                question: "你会因为对方的存在而忽略自己的健康吗？",
+                options: [
+                    "完全不会，我会保持健康的生活方式",
+                    "偶尔会，当对方需要我的时候",
+                    "会，我会为了对方而熬夜或不吃饭",
+                    "非常会，我已经忽略了自己的健康",
+                    "我已经没有自己的健康了，完全按照对方的要求来生活"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "自我优先级让渡"
+            },
+            {
+                question: "你会为了对方而放弃自己的梦想吗？",
+                options: [
+                    "完全不会，我会坚持自己的梦想",
+                    "偶尔会，当对方的建议很有道理时",
+                    "会，我会考虑对方的意见",
+                    "非常会，我已经放弃了自己的梦想",
+                    "我已经没有自己的梦想了，完全按照对方的要求来生活"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "自我优先级让渡"
+            },
+            {
+                question: "你会因为对方的存在而失去自我吗？",
+                options: [
+                    "完全不会，我会保持自我",
+                    "偶尔会，当对方需要我的时候",
+                    "会，我会为了对方而改变自己",
+                    "非常会，我已经失去了自我",
+                    "我已经没有自己的生活了，完全按照对方的要求来生活"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "自我优先级让渡"
+            },
+            // 恋爱情绪裹挟度维度（8道）
+            {
+                question: "你会因为对方的情绪而影响自己的情绪吗？",
+                options: [
+                    "完全不会，我能很好地控制自己的情绪",
+                    "偶尔会，但很快就能调整过来",
+                    "会，对方的情绪能影响我的情绪",
+                    "非常会，对方的情绪能决定我的情绪",
+                    "我的情绪完全被对方掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱情绪裹挟度"
+            },
+            {
+                question: "你会因为对方的不开心而不开心吗？",
+                options: [
+                    "完全不会，我能很好地控制自己的情绪",
+                    "偶尔会，但很快就能调整过来",
+                    "会，对方的不开心会让我不开心",
+                    "非常会，对方的不开心会让我崩溃",
+                    "我的情绪完全被对方的情绪掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱情绪裹挟度"
+            },
+            {
+                question: "你会因为对方的开心而开心吗？",
+                options: [
+                    "完全不会，我有自己的开心的事情",
+                    "偶尔会，当对方的开心很有感染力时",
+                    "会，对方的开心会让我开心",
+                    "非常会，对方的开心是我唯一的开心",
+                    "我的情绪完全被对方的情绪掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱情绪裹挟度"
+            },
+            {
+                question: "你会因为对方的存在而感到压力吗？",
+                options: [
+                    "完全不会，我能很好地处理压力",
+                    "偶尔会，但很快就能调整过来",
+                    "会，对方的存在会让我感到压力",
+                    "非常会，对方的存在让我喘不过气",
+                    "我已经无法忍受这种压力，想要逃离"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱情绪裹挟度"
+            },
+            {
+                question: "你会因为对方的存在而感到焦虑吗？",
+                options: [
+                    "完全不会，我能很好地处理焦虑",
+                    "偶尔会，但很快就能调整过来",
+                    "会，对方的存在会让我感到焦虑",
+                    "非常会，对方的存在让我无法正常生活",
+                    "我已经无法忍受这种焦虑，想要逃离"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱情绪裹挟度"
+            },
+            {
+                question: "你会因为对方的存在而感到幸福吗？",
+                options: [
+                    "完全不会，我有自己的幸福的事情",
+                    "偶尔会，当对方对我很好时",
+                    "会，对方的存在会让我感到幸福",
+                    "非常会，对方的存在是我唯一的幸福",
+                    "我的幸福完全被对方的存在掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱情绪裹挟度"
+            },
+            {
+                question: "你会因为对方的存在而感到孤独吗？",
+                options: [
+                    "完全不会，我能很好地处理孤独",
+                    "偶尔会，但很快就能调整过来",
+                    "会，对方的存在会让我感到孤独",
+                    "非常会，对方的存在让我感到更加孤独",
+                    "我已经无法忍受这种孤独，想要逃离"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱情绪裹挟度"
+            },
+            {
+                question: "你会因为对方的存在而感到迷茫吗？",
+                options: [
+                    "完全不会，我有自己的目标和方向",
+                    "偶尔会，但很快就能找到方向",
+                    "会，对方的存在会让我感到迷茫",
+                    "非常会，对方的存在让我失去了方向",
+                    "我已经无法忍受这种迷茫，想要逃离"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱情绪裹挟度"
+            },
+            // 沉没成本执念度维度（8道）
+            {
+                question: "你会因为已经在对方身上投入了很多时间和精力而不愿意放弃这段感情吗？",
+                options: [
+                    "完全不会，我会理性地看待感情",
+                    "偶尔会，但不会因为沉没成本而坚持",
+                    "会，我觉得放弃太可惜了",
+                    "非常会，我已经投入了太多，不能放弃",
+                    "我已经无法自拔，即使知道这段感情没有结果，也不愿意放弃"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "沉没成本执念度"
+            },
+            {
+                question: "你会因为已经在对方身上投入了很多金钱而不愿意放弃这段感情吗？",
+                options: [
+                    "完全不会，我会理性地看待感情",
+                    "偶尔会，但不会因为金钱而坚持",
+                    "会，我觉得放弃太可惜了",
+                    "非常会，我已经投入了太多金钱，不能放弃",
+                    "我已经无法自拔，即使知道这段感情没有结果，也不愿意放弃"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "沉没成本执念度"
+            },
+            {
+                question: "你会因为已经在对方身上投入了很多感情而不愿意放弃这段感情吗？",
+                options: [
+                    "完全不会，我会理性地看待感情",
+                    "偶尔会，但不会因为感情而坚持",
+                    "会，我觉得放弃太可惜了",
+                    "非常会，我已经投入了太多感情，不能放弃",
+                    "我已经无法自拔，即使知道这段感情没有结果，也不愿意放弃"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "沉没成本执念度"
+            },
+            {
+                question: "你会因为已经在对方身上投入了很多时间和精力而原谅对方的错误吗？",
+                options: [
+                    "完全不会，我会理性地看待对方的错误",
+                    "偶尔会，当对方的错误不严重时",
+                    "会，我觉得放弃太可惜了",
+                    "非常会，我已经投入了太多，不能放弃",
+                    "我已经无法自拔，即使知道对方的错误很严重，也不愿意放弃"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "沉没成本执念度"
+            },
+            {
+                question: "你会因为已经在对方身上投入了很多金钱而原谅对方的错误吗？",
+                options: [
+                    "完全不会，我会理性地看待对方的错误",
+                    "偶尔会，当对方的错误不严重时",
+                    "会，我觉得放弃太可惜了",
+                    "非常会，我已经投入了太多金钱，不能放弃",
+                    "我已经无法自拔，即使知道对方的错误很严重，也不愿意放弃"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "沉没成本执念度"
+            },
+            {
+                question: "你会因为已经在对方身上投入了很多感情而原谅对方的错误吗？",
+                options: [
+                    "完全不会，我会理性地看待对方的错误",
+                    "偶尔会，当对方的错误不严重时",
+                    "会，我觉得放弃太可惜了",
+                    "非常会，我已经投入了太多感情，不能放弃",
+                    "我已经无法自拔，即使知道对方的错误很严重，也不愿意放弃"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "沉没成本执念度"
+            },
+            {
+                question: "你会因为已经在对方身上投入了很多时间和精力而继续在对方身上投入吗？",
+                options: [
+                    "完全不会，我会理性地看待感情",
+                    "偶尔会，当我觉得还有希望时",
+                    "会，我觉得放弃太可惜了",
+                    "非常会，我已经投入了太多，不能放弃",
+                    "我已经无法自拔，即使知道这段感情没有结果，也继续在对方身上投入"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "沉没成本执念度"
+            },
+            {
+                question: "你会因为已经在对方身上投入了很多金钱而继续在对方身上投入吗？",
+                options: [
+                    "完全不会，我会理性地看待感情",
+                    "偶尔会，当我觉得还有希望时",
+                    "会，我觉得放弃太可惜了",
+                    "非常会，我已经投入了太多金钱，不能放弃",
+                    "我已经无法自拔，即使知道这段感情没有结果，也继续在对方身上投入"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "沉没成本执念度"
+            },
+            // 恋爱决策失智度维度（8道）
+            {
+                question: "你会因为对方的甜言蜜语而做出冲动的决定吗？",
+                options: [
+                    "完全不会，我能理性地看待甜言蜜语",
+                    "偶尔会，但不会做出太冲动的决定",
+                    "会，我容易被甜言蜜语打动",
+                    "非常会，我会因为甜言蜜语而做出冲动的决定",
+                    "我已经失去了理性，完全被对方的甜言蜜语掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱决策失智度"
+            },
+            {
+                question: "你会因为对方的承诺而做出冲动的决定吗？",
+                options: [
+                    "完全不会，我能理性地看待承诺",
+                    "偶尔会，但不会做出太冲动的决定",
+                    "会，我容易被承诺打动",
+                    "非常会，我会因为承诺而做出冲动的决定",
+                    "我已经失去了理性，完全被对方的承诺掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱决策失智度"
+            },
+            {
+                question: "你会因为对方的外表而做出冲动的决定吗？",
+                options: [
+                    "完全不会，我能理性地看待外表",
+                    "偶尔会，但不会做出太冲动的决定",
+                    "会，我容易被外表打动",
+                    "非常会，我会因为外表而做出冲动的决定",
+                    "我已经失去了理性，完全被对方的外表掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱决策失智度"
+            },
+            {
+                question: "你会因为对方的家庭背景而做出冲动的决定吗？",
+                options: [
+                    "完全不会，我能理性地看待家庭背景",
+                    "偶尔会，但不会做出太冲动的决定",
+                    "会，我容易被家庭背景打动",
+                    "非常会，我会因为家庭背景而做出冲动的决定",
+                    "我已经失去了理性，完全被对方的家庭背景掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱决策失智度"
+            },
+            {
+                question: "你会因为对方的经济状况而做出冲动的决定吗？",
+                options: [
+                    "完全不会，我能理性地看待经济状况",
+                    "偶尔会，但不会做出太冲动的决定",
+                    "会，我容易被经济状况打动",
+                    "非常会，我会因为经济状况而做出冲动的决定",
+                    "我已经失去了理性，完全被对方的经济状况掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱决策失智度"
+            },
+            {
+                question: "你会因为对方的社会地位而做出冲动的决定吗？",
+                options: [
+                    "完全不会，我能理性地看待社会地位",
+                    "偶尔会，但不会做出太冲动的决定",
+                    "会，我容易被社会地位打动",
+                    "非常会，我会因为社会地位而做出冲动的决定",
+                    "我已经失去了理性，完全被对方的社会地位掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱决策失智度"
+            },
+            {
+                question: "你会因为对方的才华而做出冲动的决定吗？",
+                options: [
+                    "完全不会，我能理性地看待才华",
+                    "偶尔会，但不会做出太冲动的决定",
+                    "会，我容易被才华打动",
+                    "非常会，我会因为才华而做出冲动的决定",
+                    "我已经失去了理性，完全被对方的才华掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱决策失智度"
+            },
+            {
+                question: "你会因为对方的善良而做出冲动的决定吗？",
+                options: [
+                    "完全不会，我能理性地看待善良",
+                    "偶尔会，但不会做出太冲动的决定",
+                    "会，我容易被善良打动",
+                    "非常会，我会因为善良而做出冲动的决定",
+                    "我已经失去了理性，完全被对方的善良掌控"
+                ],
+                scores: [1, 2, 3, 4, 5],
+                dimension: "恋爱决策失智度"
+            }
+        ];
+
+        // 初始化
+        let currentQuestion = 0;
+        let totalScore = 0;
+        let dimensionScores = {
+            "情感依赖度": 0,
+            "自我优先级让渡": 0,
+            "恋爱情绪裹挟度": 0,
+            "沉没成本执念度": 0,
+            "恋爱决策失智度": 0
+        };
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // 渲染问题
+        function renderQuestion() {
+            const question = questions[currentQuestion];
+            const questionElement = document.createElement('div');
+            questionElement.className = 'question';
+            questionElement.innerHTML = `
+                <h3>${currentQuestion + 1}. ${question.question}</h3>
+                <div class="options">
+                    ${question.options.map((option, index) => `
+                        <div class="option" data-score="${question.scores[index]}">${option}</div>
+                    `).join('')}
+                </div>
+            `;
+            quizContainer.innerHTML = '';
+            quizContainer.appendChild(questionElement);
+
+            // 添加选项点击事件
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                });
+            });
+        }
+
+        // 提交答案
+        submitBtn.addEventListener('click', () => {
+            const selectedOption = document.querySelector('.option.selected');
+            if (!selectedOption) {
+                alert('请选择一个选项！');
+                return;
+            }
+
+            const score = parseInt(selectedOption.dataset.score);
+            totalScore += score;
+            dimensionScores[questions[currentQuestion].dimension] += score;
+            currentQuestion++;
+
+            if (currentQuestion < questions.length) {
+                renderQuestion();
+            } else {
+                showResult();
+            }
+        });
+
+        // 显示结果
+        function showResult() {
+            const normalizedScore = Math.round((totalScore / 200) * 100); // 40题*5分=200分，转换为0-100分
+            const level = getLevel(normalizedScore);
+            const container = document.querySelector('.container');
+            container.innerHTML = `
+                <div class="result-container">
+                    <h2>测评结果</h2>
+                    <div class="result">你的恋爱脑指数：${normalizedScore}/100</div>
+                    <div class="result">恋爱脑等级：${level.name}</div>
+                    <div class="radar-container">
+                        <canvas id="radar-chart"></canvas>
+                    </div>
+                    <div class="level-description">
+                        <h3>等级解析</h3>
+                        <p>${level.description}</p>
+                    </div>
+                    <div class="level-description">
+                        <h3>戒断指南</h3>
+                        <p>${level.guidance}</p>
+                    </div>
+                    <div class="disclaimer-bottom">
+                        <p>⚠️ 本测试为趣味娱乐内容，非专业心理诊疗 / 心理咨询建议。</p>
+                    </div>
+                </div>
+            `;
+
+            // 绘制雷达图
+            drawRadarChart(normalizedScore, dimensionScores);
+        }
+
+        // 获取等级
+        function getLevel(score) {
+            if (score >= 81) {
+                return {
+                    name: "重度恋爱脑",
+                    description: "你在恋爱中非常容易失去自我，完全被对方掌控。你会因为对方的存在而忽略自己的朋友和家人，放弃自己的兴趣爱好和职业规划。你会因为对方的情绪而影响自己的情绪，对方的一句话能让你开心或难过很久。你会因为已经在对方身上投入了很多时间和精力而不愿意放弃这段感情，即使知道这段感情没有结果。",
+                    guidance: "你需要重新找回自我，建立自己的边界感。你可以尝试多和朋友家人联系，发展自己的兴趣爱好，制定自己的职业规划。你需要学会控制自己的情绪，不要让对方的情绪影响自己的情绪。你需要理性地看待感情，不要因为沉没成本而坚持一段没有结果的感情。"
+                };
+            } else if (score >= 61) {
+                return {
+                    name: "中度恋爱脑",
+                    description: "你在恋爱中比较容易失去自我，容易被对方的情绪影响。你会因为对方的存在而忽略自己的一些兴趣爱好和朋友家人，但还能保持一定的自我。你会因为对方的一句话而情绪波动，但还能控制自己的情绪。你会因为已经在对方身上投入了一些时间和精力而不愿意放弃这段感情，但还能理性地看待感情。",
+                    guidance: "你需要进一步加强自我意识，建立自己的边界感。你可以尝试多关注自己的需求和感受，不要总是为了对方而委屈自己。你需要学会控制自己的情绪，不要让对方的情绪影响自己的情绪。你需要理性地看待感情，不要因为沉没成本而坚持一段没有结果的感情。"
+                };
+            } else if (score >= 31) {
+                return {
+                    name: "轻度恋爱脑",
+                    description: "你在恋爱中能保持一定的自我，但还是会受到对方的一些影响。你会因为对方的存在而调整自己的一些计划和安排，但不会完全放弃自己的兴趣爱好和朋友家人。你会因为对方的一句话而情绪波动，但很快就能调整过来。你会因为已经在对方身上投入了一些时间和精力而不愿意放弃这段感情，但还能理性地看待感情。",
+                    guidance: "你需要继续保持自我意识，不要因为恋爱而失去自我。你可以尝试多和朋友家人联系，发展自己的兴趣爱好，保持自己的独立性。你需要学会控制自己的情绪，不要让对方的情绪影响自己的情绪。你需要理性地看待感情，不要因为沉没成本而坚持一段没有结果的感情。"
+                };
+            } else {
+                return {
+                    name: "清醒型",
+                    description: "你在恋爱中能保持清醒的头脑，不会因为恋爱而失去自我。你会平衡好恋爱和亲情友情的关系，不会因为对方的存在而忽略自己的朋友和家人。你会坚持自己的原则和底线，不会因为对方的要求而改变自己。你会理性地看待感情，不会因为沉没成本而坚持一段没有结果的感情。",
+                    guidance: "你需要继续保持清醒的头脑，不要因为恋爱而失去自我。你可以尝试多和对方沟通，了解对方的需求和感受，共同维护好这段感情。你需要学会表达自己的需求和感受，不要总是委屈自己。你需要理性地看待感情，不要因为一时的冲动而做出错误的决定。"
+                };
+            }
+        }
+
+        // 绘制雷达图
+        function drawRadarChart(score, dimensionScores) {
+            // 转换每个维度的得分（每个维度8题，每题5分，所以每个维度得分范围是8-40分，转换为0-100分）
+            const normalizedDimensionScores = {
+                "情感依赖度": Math.round((dimensionScores["情感依赖度"] / 40) * 100),
+                "自我优先级让渡": Math.round((dimensionScores["自我优先级让渡"] / 40) * 100),
+                "恋爱情绪裹挟度": Math.round((dimensionScores["恋爱情绪裹挟度"] / 40) * 100),
+                "沉没成本执念度": Math.round((dimensionScores["沉没成本执念度"] / 40) * 100),
+                "恋爱决策失智度": Math.round((dimensionScores["恋爱决策失智度"] / 40) * 100)
+            };
+
+            const ctx = document.getElementById('radar-chart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['情感依赖度', '自我优先级让渡', '恋爱情绪裹挟度', '沉没成本执念度', '恋爱决策失智度'],
+                    datasets: [{
+                        label: '你的得分',
+                        data: [
+                            normalizedDimensionScores["情感依赖度"],
+                            normalizedDimensionScores["自我优先级让渡"],
+                            normalizedDimensionScores["恋爱情绪裹挟度"],
+                            normalizedDimensionScores["沉没成本执念度"],
+                            normalizedDimensionScores["恋爱决策失智度"]
+                        ],
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(102, 126, 234, 1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            ticks: {
+                                stepSize: 20,
+                                backdropColor: 'transparent'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw.toFixed(1);
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // 初始化
+        renderQuestion();
+    </script>
+</body>
+</html>
